@@ -1,0 +1,18 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=39:DF:26:F3:A7:B4:D3:DA:2B:04:D0:9E:E6:B0:F9:78:A8:A8:84:CC%3Bcom.example.floraxue.flightchecker
+
+    You can also add your credentials to an existing key, using this line:
+    39:DF:26:F3:A7:B4:D3:DA:2B:04:D0:9E:E6:B0:F9:78:A8:A8:84:CC;com.example.floraxue.flightchecker
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" translatable="false" templateMergeStrategy="preserve">
+        AIzaSyBUia-lyKB1JtAKkDi0xK6nLNsCKRANnFk
+    </string>
+</resources>
