@@ -11,7 +11,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
@@ -26,10 +25,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -40,13 +37,17 @@ import java.util.List;
 public class MapsActivity extends Activity implements OnMapReadyCallback {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private String source = "";
-    private String destination = "";
+    private String url_clean_source = "";
+    private String cleaned_source = "";
+    private String uncleaned_source = "";
+    private String url_clean_destination = "";
+    private String cleaned_destination = "";
+    private String uncleaned_destination = "";
     private String source_weather = "";
     private String destination_weather = "";
     private String result;
     private static String url_head =
-            "http://api.apixu.com/v1/forecast.json?key=43b694b695254668be533703162404&q=";
+            "http://api.apixu.com/v1/current.json?key=43b694b695254668be533703162404&q=";
     private static String url_tail =
             "%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
     private String[] dangerWeather = new String[]{"Blizzard", "Heavy rain", "Light freezing rain",
@@ -79,13 +80,23 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 delayed = false;
-                source = cleanString(source_box.getText().toString());
-                destination = cleanString(destination_box.getText().toString());
+                url_clean_source = cleanString(source_box.getText().toString());
+                cleaned_source = cleanString2(source_box.getText().toString());
+                uncleaned_source = source_box.getText().toString();
+                url_clean_destination = cleanString(destination_box.getText().toString());
+                cleaned_destination = cleanString2(destination_box.getText().toString());
+                uncleaned_destination = destination_box.getText().toString();
                 Network n = new Network();
                 n.execute();
                 if (delayed) {
+//                    result_box.setText("The flight is DELAYED\n" + uncleaned_source + " weather: " +
+//                    source_weather + ", " + uncleaned_destination + " weather: " +
+//                    destination_weather);
                     result_box.setText("The flight is DELAYED");
                 } else {
+//                    result_box.setText("The flight is ON TIME\n" + uncleaned_source + " weather: " +
+//                    source_weather + ", " + uncleaned_destination + " weather: " +
+//                            destination_weather);
                     result_box.setText("The flight is ON TIME");
                 }
                 mapFragment.getMapAsync(MapsActivity.this);
@@ -106,8 +117,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
     private class Network extends AsyncTask {
         @Override
         protected Boolean doInBackground(Object[] params) {
-            String query_url_source = url_head + source;
-            String query_url_destination = url_head + destination;
+            String query_url_source = url_head + url_clean_source;
+            String query_url_destination = url_head + url_clean_destination;
             JSONObject jsonObject = null;
             String response = null;
             try {
@@ -122,6 +133,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
                     c.setReadTimeout(5000);
                     c.connect();
                     int status = c.getResponseCode();
+                    Log.d("network", query_url_source);
+
 
                     switch (status) {
                         case 200:
@@ -138,7 +151,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
                             JSONObject j1 = (JSONObject) jsonObject.get("current");
                             JSONObject j2 = (JSONObject) j1.get("condition");
                             String j3 = (String) j2.get("text");
-                            Log.d("network", source + " " + j3);
+                            Log.d("network", url_clean_source + " " + j3);
                             source_weather = j3;
                             if (dangerWeatherSet.contains(j3)) {
                                 delayed = true;
@@ -151,7 +164,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
                 Log.e("network", e.toString());
             }
 
-            // Do it again for destination
+            // Do it again for url_clean_destination
             try {
                 URL url = new URL(query_url_destination);
                 HttpURLConnection c = (HttpURLConnection) url.openConnection();
@@ -180,7 +193,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
                             JSONObject j1 = (JSONObject) jsonObject.get("current");
                             JSONObject j2 = (JSONObject) j1.get("condition");
                             String j3 = (String) j2.get("text");
-                            Log.d("network", j3);
+                            Log.d("network", url_clean_destination + " " + j3);
                             destination_weather = j3;
                             if (dangerWeatherSet.contains(j3)) {
                                 delayed = true;
@@ -197,7 +210,15 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
     }
 
     private static String cleanString(String s) {
-        return s.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+        s = s.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+        s = s.replaceAll("[ ]", "%20");
+        return s;
+    }
+
+    private static String cleanString2(String s) {
+        s = s.replaceAll("[^a-zA-Z ]", "").toLowerCase();
+//        s = s.replaceAll("[ ]", "%20");
+        return s;
     }
 
     @Override
@@ -210,12 +231,12 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
         LatLng latLng_source = null;
         LatLng latLng_destination = null;
 
-        if(Geocoder.isPresent() && source.length() > 0 && destination.length() > 0){
+        if(Geocoder.isPresent() && url_clean_source.length() > 0 && url_clean_destination.length() > 0){
             try {
 //                String location = "theNameOfTheLocation";
                 Geocoder gc = new Geocoder(this);
-                List<Address> addresses_source = gc.getFromLocationName(source, 5); // get the found Address Objects
-                List<Address> addresses_destination = gc.getFromLocationName(destination, 5); // get the found Address Objects
+                List<Address> addresses_source = gc.getFromLocationName(cleaned_source, 5); // get the found Address Objects
+                List<Address> addresses_destination = gc.getFromLocationName(cleaned_destination, 5); // get the found Address Objects
                 latLng_source = new LatLng(addresses_source.get(0).getLatitude(),
                         addresses_source.get(0).getLongitude());
                 latLng_destination = new LatLng(addresses_destination.get(0).getLatitude(),
