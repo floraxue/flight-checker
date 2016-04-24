@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">FlightChecker</string>
     <string name="title_activity_maps">Map</string>
-    <string name="default_instruction">Please input flight number and press search</string>
+    <string name="default_instruction">Please input start and end city \n and press search</string>
 </resources>

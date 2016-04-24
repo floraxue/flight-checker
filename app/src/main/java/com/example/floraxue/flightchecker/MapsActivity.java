@@ -42,6 +42,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private String source = "";
     private String destination = "";
+    private String source_weather = "";
+    private String destination_weather = "";
     private String result;
     private static String url_head =
             "http://api.apixu.com/v1/forecast.json?key=43b694b695254668be533703162404&q=";
@@ -136,7 +138,8 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
                             JSONObject j1 = (JSONObject) jsonObject.get("current");
                             JSONObject j2 = (JSONObject) j1.get("condition");
                             String j3 = (String) j2.get("text");
-                            Log.d("network", j3);
+                            Log.d("network", source + " " + j3);
+                            source_weather = j3;
                             if (dangerWeatherSet.contains(j3)) {
                                 delayed = true;
                             }
@@ -178,6 +181,7 @@ public class MapsActivity extends Activity implements OnMapReadyCallback {
                             JSONObject j2 = (JSONObject) j1.get("condition");
                             String j3 = (String) j2.get("text");
                             Log.d("network", j3);
+                            destination_weather = j3;
                             if (dangerWeatherSet.contains(j3)) {
                                 delayed = true;
                             }
